@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.system.MaterialManageMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.system.MaterialManage">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="material_id" jdbcType="BIGINT" property="materialId" />
+    <result column="material_name" jdbcType="VARCHAR" property="materialName" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="material_file" jdbcType="VARCHAR" property="materialFile" />
+    <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag" />
+    <result column="created_by" jdbcType="BIGINT" property="createdBy" />
+    <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
+    <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime" />
+  </resultMap>
+
+   <sql id="Base_Column_List">
+    	material_id,material_name,product_id,material_file,delete_flag,created_by,created_time,updated_by,updated_time
+  	</sql>
+
+  <resultMap id="materialManageVO" type="com.mantoo.mtic.module.system.entity.vo.MaterialManageVO">
+    <id column="material_id" jdbcType="BIGINT" property="materialId" />
+    <result column="material_name" jdbcType="VARCHAR" property="materialName" />
+    <result column="material_file" jdbcType="VARCHAR" property="materialFile" />
+    <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    <result column="product_code" jdbcType="VARCHAR" property="productCode" />
+    <result column="product_id" jdbcType="BIGINT" property="productId" />
+  </resultMap>
+
+  <select id="selectMaterialManageListWithCondition" parameterType="com.mantoo.mtic.module.system.entity.system.MaterialManage" resultMap="materialManageVO">
+    select mm.material_id,mm.material_name,mm.material_file,mm.created_time,pm.product_code,pm.product_id
+    from material_manage mm
+    left join product_manage pm
+    on mm.product_id = pm.product_id
+    <where>
+      <if test="materialName != null and materialName !=''">
+        AND mm.material_name LIKE CONCAT ("%",#{materialName},"%")
+      </if>
+      <if test="productId != null">
+        AND mm.product_id =#{productId}
+      </if>
+      AND mm.delete_flag = 0
+    </where>
+    order by mm.created_time desc
+  </select>
+
+
+  <select id="materialManageRepeat" parameterType="com.mantoo.mtic.module.system.entity.system.MaterialManage" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from material_manage mm
+    <where>
+      <if test="materialName != null and materialName !=''">
+        AND mm.material_name =#{materialName}
+      </if>
+      <if test="productId != null">
+        AND mm.product_id =#{productId}
+      </if>
+        </where>
+  </select>
+
+
+  <!--删除固件，即将固件的删除标志改为1-->
+  <delete id="deleteMaterialManage">
+        update material_manage mm
+            set mm.delete_flag =1
+            <where>
+              <if test="materialId != null">
+                AND mm.material_id =#{materialId}
+              </if>
+              <if test="materialName != null and materialName !=''">
+                AND mm.material_name =#{materialName}
+              </if>
+              <if test="productId != null">
+                AND mm.product_id =#{productId}
+              </if>
+            </where>
+    </delete>
+</mapper>

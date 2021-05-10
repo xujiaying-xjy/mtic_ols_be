@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.system.FirmwareManageMapper">
+    <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.system.FirmwareManage">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="firmware_id" jdbcType="BIGINT" property="firmwareId"/>
+        <result column="firmware_name" jdbcType="VARCHAR" property="firmwareName"/>
+        <result column="firmware_version" jdbcType="VARCHAR" property="firmwareVersion"/>
+        <result column="product_id" jdbcType="BIGINT" property="productId"/>
+        <result column="firmware_file" jdbcType="VARCHAR" property="firmwareFile"/>
+        <result column="firmware_describe" jdbcType="VARCHAR" property="firmwareDescribe"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+        <result column="create_by" jdbcType="BIGINT" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_by" jdbcType="BIGINT" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="firmware_size" jdbcType="INTEGER" property="firmwareSize"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    	firmware_id,firmware_name,firmware_version,product_id,firmware_file,firmware_describe,delete_flag,create_by,create_time,update_by,update_time
+  	</sql>
+
+    <resultMap id="numberMap" type="com.mantoo.mtic.module.system.entity.vo.FirmwareManageVO">
+            <id column="firmware_id" jdbcType="BIGINT" property="firmwareId"></id>
+            <result column="firmware_name" jdbcType="VARCHAR" property="firmwareName"></result>
+            <result column="firmware_version" jdbcType="VARCHAR" property="firmwareVersion"/>
+            <result column="product_code" jdbcType="VARCHAR" property="productCode"></result>
+            <result column="firmware_file" jdbcType="VARCHAR" property="firmwareFile"/>
+            <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+            <result column="equipNum" jdbcType="INTEGER" property="equipNum"></result>
+            <result column="firmware_describe" jdbcType="VARCHAR" property="description"></result>
+    </resultMap>
+    <!--条件模糊查询固件信息-->
+    <select id="selectFirmwareManageListWithCondition" resultMap="numberMap" parameterType="com.mantoo.mtic.module.system.entity.system.FirmwareManage">
+        select
+            fm.product_id,
+            fm.firmware_id,
+            fm.firmware_name,
+            fm.firmware_version,
+            pm.product_code,
+            fm.create_time,
+            fm.firmware_file,
+            count(ei.firmware_id) as equipNum,
+            fm.firmware_describe
+            from firmware_manage fm
+        left join equip_info ei on fm.firmware_id = ei.firmware_id
+        left join product_manage pm on fm.product_id = pm.product_id
+         <where>
+             <if test="firmwareName!=null and firmwareName!='' ">
+                 and  fm.firmware_name  LIKE CONCAT ("%",#{firmwareName},"%")
+             </if>
+             <if test="firmwareVersion!=null and firmwareVersion!='' ">
+                 and  fm.firmware_version  LIKE CONCAT ("%",#{firmwareVersion},"%")
+             </if>
+             <if test="productId!=null">
+                 and  pm.product_id =#{productId}
+             </if>
+             and fm.delete_flag=0
+         </where>
+        GROUP BY fm.firmware_id
+        order by fm.create_time desc
+    </select>
+
+
+    <!--删除固件，即将固件的删除标志改为1-->
+    <delete id="deleteFirmManage">
+        update firmware_manage fm
+            set fm.delete_flag =1
+         where fm.firmware_id=#{firmwareId}
+    </delete>
+
+    <!--判断一个固件是否重复需要同时判断3个属性，都不一样才能算是不重复 firmwareName,firmwareVersion,productId-->
+    <select id="firmManageRepeat" parameterType="com.mantoo.mtic.module.system.entity.system.FirmwareManage" resultType="com.mantoo.mtic.module.system.entity.system.FirmwareManage">
+        select * from firmware_manage fm
+          <where>
+              <if test="firmwareId!=null"  >
+                  AND fm.firmware_id=#{firmwareId}
+              </if>
+              <if test="firmwareName!=null  and   firmwareName !=''"  >
+                  AND fm.firmware_name=#{firmwareName}
+              </if>
+              <if test="firmwareVersion!=null  and firmwareVersion !=''"  >
+                  AND fm.firmware_version=#{firmwareVersion}
+              </if>
+              <if test="productId!=null"  >
+                  AND fm.product_id=#{productId}
+              </if>
+          </where>
+    </select>
+
+    <select id="getFirmwareManageByProductMange" parameterType="java.lang.Long" resultType="com.mantoo.mtic.module.system.entity.system.FirmwareManage">
+       select * from firmware_manage fm
+           <where>
+               <if test="productId!=null"  >
+                   AND fm.product_id=#{productId}
+               </if>
+           </where>
+           group by fm.firmware_version
+    </select>
+</mapper>

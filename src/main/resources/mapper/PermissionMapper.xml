@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.mapper.PermissionMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.Permission">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="permission_id" jdbcType="BIGINT" property="permissionId" />
+    <result column="menu_id" jdbcType="VARCHAR" property="menuId" />
+    <result column="permission_name" jdbcType="VARCHAR" property="permissionName" />
+    <result column="sort" jdbcType="INTEGER" property="sort" />
+    <result column="shiro_code" jdbcType="VARCHAR" property="shiroCode" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.equip.EquipGroupMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.equip.EquipGroup">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="equip_group_id" jdbcType="BIGINT" property="equipGroupId" />
+    <result column="equip_group_name" jdbcType="VARCHAR" property="equipGroupName" />
+    <result column="equip_group_code" jdbcType="VARCHAR" property="equipGroupCode" />
+    <result column="person_in_charge" jdbcType="BIGINT" property="personInCharge" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag" />
+    <result column="create_by" jdbcType="BIGINT" property="createBy" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_by" jdbcType="BIGINT" property="updateBy" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <resultMap id="EquipGroupResultMap" type="com.mantoo.mtic.module.system.entity.equip.EquipGroup" extends="BaseResultMap">
+    <result column="name" jdbcType="VARCHAR" property="personInChargeName"/>
+    <result column="equipNum" jdbcType="VARCHAR" property="equipNum"/>
+  </resultMap>
+
+  <!--条件模糊查询-->
+  <select id="selectEquipGroupListWithCondition"
+          resultType="com.mantoo.mtic.module.system.entity.equip.EquipGroup" resultMap="EquipGroupResultMap">
+    SELECT
+    eg.*,u.name,(select count(1) from equip_info where equip_group_id=eg.equip_group_id) as equipNum
+    FROM
+      equip_group eg
+      left join sys_user u on eg.person_in_charge=u.user_id
+      WHERE
+      eg.delete_flag = 0
+    <if test="equipGroupName != null and equipGroupName !=''">
+      AND eg.`equip_group_name` LIKE CONCAT ("%",#{equipGroupName},"%")
+    </if>
+    <if test="equipGroupCode != null and equipGroupCode !=''">
+      AND eg.`equip_group_code` LIKE CONCAT ("%",#{equipGroupCode},"%")
+    </if>
+    <if test="personInCharge != null and personInCharge !=''">
+      AND eg.person_in_charge = #{personInCharge}
+    </if>
+    ORDER BY eg.create_time DESC
+
+  </select>
+
+
+  <!--判断是否重复-->
+  <select id="selectEquipGroupByEquipGroupCode" resultType="java.lang.Integer">
+    select * from equip_group eg where eg.equip_group_code = #{equipGroupCode}
+  </select>
+
+
+
+  <select id="selectByEquipGroupCustomerId" resultType="com.mantoo.mtic.module.system.entity.SysUser">
+    select u.name,u.user_id from equip_group_customer c
+	left join sys_user u on c.customer_id=u.user_id
+	where c.equip_group_id=#{equipGroupId}
+  </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.ExSysUserMapper">
+    <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.SysUser">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="role_id" jdbcType="BIGINT" property="roleId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="do_use" jdbcType="INTEGER" property="doUse"/>
+        <result column="user_type" jdbcType="INTEGER" property="userType"/>
+        <result column="login_time" jdbcType="TIMESTAMP" property="loginTime"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="sex" jdbcType="INTEGER" property="sex"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="receive_warning" jdbcType="INTEGER" property="receiveWarning"/>
+        <result column="user_img_url" jdbcType="VARCHAR" property="userImgUrl"/>
+        <result column="open_id" jdbcType="VARCHAR" property="openId"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+        <result column="create_by" jdbcType="BIGINT" property="createBy"/>
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="update_by" jdbcType="BIGINT" property="updateBy"/>
+        <result column="update_date" jdbcType="TIMESTAMP" property="updateDate"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="password_error_count" jdbcType="INTEGER" property="passwordErrorCount" />
+    </resultMap>
+
+    <resultMap id="UserResultMap" type="com.mantoo.mtic.module.system.data.ExSysUser" extends="BaseResultMap">
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+    </resultMap>
+
+    <!--分页查询用户列表-->
+    <select id="getPageList" parameterType="com.mantoo.mtic.module.system.data.ExSysUser" resultMap="UserResultMap">
+        SELECT
+            u.*, r.role_name
+        FROM
+            sys_user u
+        LEFT JOIN sys_role r ON u.role_id = r.role_id
+        WHERE
+            u.delete_flag = 0
+        <if test="name != null and name !=''">
+            AND u.`name` LIKE CONCAT ("%",#{name},"%")
+        </if>
+        <if test="mobile != null and mobile !=''">
+            AND u.`mobile` LIKE CONCAT ("%",#{mobile},"%")
+        </if>
+        <if test="roleId != null">
+            AND u.role_id = #{roleId}
+        </if>
+        <if test="doUse != null">
+            AND u.do_use = #{doUse}
+        </if>
+        <if test="receiveWarning != null">
+            AND u.receive_warning = #{receiveWarning}
+        </if>
+        <if test="userType != null">
+            AND u.user_type = #{userType}
+        </if>
+        ORDER BY u.create_date DESC
+    </select>
+
+    <!--根据用户id获取用户名字列表-->
+    <select id="getUserList" parameterType="string" resultMap="BaseResultMap">
+      SELECT
+	    *
+      FROM
+	    sys_user
+      WHERE
+	    user_id IN (${userIds})
+    </select>
+</mapper>

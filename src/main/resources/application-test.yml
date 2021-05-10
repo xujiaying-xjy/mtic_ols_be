@@ -1,0 +1,85 @@
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: mantoosoft
+    url: jdbc:mysql://192.168.50.230:3306/mtic4.0?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    hikari:
+      # 最小空闲连接数量
+      minimum-idle: 5
+      # 空闲连接存活最大时间，默认600000（10分钟）
+      idle-timeout: 180000
+      # 连接池最大连接数，默认是10
+      maximum-pool-size: 10
+      # 从池返回的连接的默认自动提交行为,默认值：true
+      auto-commit: true
+      # 连接池母子
+      pool-name: MyHikariCP
+      # 池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+      max-lifetime: 1800000
+      # 数据库连接超时时间,默认30秒
+      connection-timeout: 30000
+      # 连接测试sql
+      connection-test-query: SELECT 1
+  quartz:
+    #相关属性配置
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: DefaultQuartzScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: qrtz_
+            isClustered: false
+            clusterCheckinInterval: 10000
+            misfireThreshold: 60000
+            useProperties: true
+            dataSource: qzDS
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+          dataSource:
+            qzDS:
+              URL: ${spring.datasource.url}
+              user: ${spring.datasource.username}
+              password: ${spring.datasource.password}
+              driver: ${spring.datasource.driver-class-name}
+              provider: hikaricp
+    job-store-type: jdbc
+  servlet:
+    multipart:
+      max-file-size: 50MB  #单个文件最大大小
+      max-request-size: 100MB #单次请求文件最大大小
+  data:
+    mongodb:
+      host: 192.168.50.230
+      port: 27017
+      database: mtic3
+      username: mantoo
+      password: mantoosoftware
+      authentication-database: admin
+#短信
+shortMessage:
+  username: yican
+  password: mantoo251314
+  prefix: 【漫途】
+
+#极光推送
+push:
+  appkey: 56516af361338479de67ce62
+  secret: 7c83f49ae0ce886f4308e560
+
+logging:
+  level:
+    com:
+      mantoo:
+        mtic: debug
+server:
+  port: 8088

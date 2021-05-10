@@ -1,0 +1,86 @@
+package com.mantoo.mtic.module.netty.tcp;
+
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.mantoo.mtic.exception.ErrorInfo;
+import com.mantoo.mtic.exception.MticException;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 控制设备开关队列
+ * @author keith
+ * @version 1.0
+ * @date 2021-02-23
+ */
+@Slf4j
+public class SwitchNettyTools {
+
+    /**
+     * 响应消息缓存
+     */
+    private static final Cache<String, BlockingQueue<byte[]>> responseMsgCache = CacheBuilder.newBuilder()
+            .maximumSize(50000)
+            .expireAfterWrite(1000, TimeUnit.SECONDS)
+            .build();
+
+
+    /**
+     * 等待响应消息
+     *
+     * @param key 消息唯一标识
+     * @return ReceiveDdcMsgVo
+     */
+    public static byte[] waitReceiveMsg(String key, Long timeout) {
+        if (!Optional.ofNullable(timeout).isPresent()) {
+            timeout = 3000L;
+        }
+        try {
+            //设置超时时间
+            //poll,轮询，有输入则返回，没有则等待超时时间返回null
+            byte[] vo = Objects.requireNonNull(responseMsgCache.getIfPresent(key))
+                    .poll(timeout, TimeUnit.MILLISECONDS);
+
+            //删除key
+            responseMsgCache.invalidate(key);
+            if (Optional.ofNullable(vo).isPresent()) {
+                return vo;
+            } else {
+                throw new MticException("设备未响应", ErrorInfo.GATEWAY_OVERTIME.getCode());
+            }
+        } catch (Exception e) {
+            log.error("获取数据异常,sn={},msg=null", key);
+            return null;
+        }
+
+    }
+
+    /**
+     * 初始化响应消息的队列
+     *
+     * @param key 消息唯一标识
+     */
+    public static void initReceiveMsg(String key) {
+        responseMsgCache.put(key, new LinkedBlockingQueue<>(1));
+    }
+
+    /**
+     * 设置响应消息
+     *
+     * @param key 消息唯一标识
+     */
+    public static void setReceiveMsg(String key, byte[] bytes) {
+        if (responseMsgCache.getIfPresent(key) != null) {
+            Objects.requireNonNull(responseMsgCache.getIfPresent(key)).add(bytes);
+            return;
+        }
+        log.warn("sn {}不存在", key);
+    }
+
+}

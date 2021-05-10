@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.ExPermissionMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.Permission">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="permission_id" jdbcType="BIGINT" property="permissionId" />
+    <result column="menu_id" jdbcType="VARCHAR" property="menuId" />
+    <result column="permission_name" jdbcType="VARCHAR" property="permissionName" />
+    <result column="sort" jdbcType="INTEGER" property="sort" />
+    <result column="shiro_code" jdbcType="VARCHAR" property="shiroCode" />
+  </resultMap>
+
+  <!-- 根据用户名获取权限列表 -->
+  <select id="getPermissionsByUserName" resultMap="BaseResultMap" parameterType="string">
+        SELECT
+            p.*
+        FROM
+            sys_user u
+        LEFT JOIN sys_role r ON u.role_id = r.role_id
+        LEFT JOIN sys_role_permission rp ON r.role_id = rp.role_id
+        LEFT JOIN permission p ON p.permission_id = rp.permission_id
+        WHERE
+            u.delete_flag = 0
+        AND u.do_use = 1
+        AND r.delete_flag = 0
+        AND u.user_name = #{userName}
+  </select>
+
+    <!--根据角色id获取权限list-->
+    <select id="getPermissionsByRoleId" resultMap="BaseResultMap" parameterType="long">
+        SELECT
+            p.*
+        FROM
+            sys_role_permission rp
+        LEFT JOIN permission p ON p.permission_id = rp.permission_id
+        WHERE
+            rp.role_id = #{roleId}
+    </select>
+</mapper>

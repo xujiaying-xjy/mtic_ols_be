@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.order.WorkOrderManageMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.order.WorkOrderManage">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="work_order_id" jdbcType="BIGINT" property="workOrderId" />
+    <result column="work_order_code" jdbcType="VARCHAR" property="workOrderCode" />
+    <result column="work_order_type" jdbcType="INTEGER" property="workOrderType" />
+    <result column="work_order_status" jdbcType="INTEGER" property="workOrderStatus" />
+    <result column="question_classify" jdbcType="VARCHAR" property="questionClassify" />
+    <result column="handler_by" jdbcType="INTEGER" property="handlerBy" />
+    <result column="detail_describe" jdbcType="VARCHAR" property="detailDescribe" />
+    <result column="handler_opinion" jdbcType="VARCHAR" property="handlerOpinion" />
+    <result column="created_by" jdbcType="BIGINT" property="createdBy" />
+    <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
+    <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime" />
+  </resultMap>
+
+    <resultMap id="resMap" type="com.mantoo.mtic.module.system.entity.vo.WorkOrderManageVO">
+        <id column="work_order_id" jdbcType="BIGINT" property="workOrderId" />
+        <result column="work_order_code" jdbcType="VARCHAR" property="workOrderCode" />
+        <result column="work_order_type" jdbcType="INTEGER" property="workOrderType" />
+        <result column="work_order_status" jdbcType="INTEGER" property="workOrderStatus" />
+        <result column="question_classify" jdbcType="VARCHAR" property="questionClassify" />
+        <result column="handler_opinion" jdbcType="VARCHAR" property="handlerOpinion" />
+        <result column="handler_name" jdbcType="VARCHAR" property="handlerName" />
+        <result column="created_name" jdbcType="VARCHAR" property="createdName" />
+        <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    </resultMap>
+
+  <select id="findAllByCondition" resultMap="resMap" parameterType="com.mantoo.mtic.module.system.entity.vo.WorkOrderManageVO">
+      select  wom.work_order_id,wom.work_order_code,wom.work_order_type,wom.work_order_status,wom.question_classify,wom.handler_opinion,su.name,wom.created_time, su.name as handler_name,u.name as created_name
+              from work_order_manage wom
+              left join sys_user su on wom.handler_by = su.user_id
+              left join sys_user u on wom.created_by = u.user_id
+               <where>
+                    <if test="workOrderCode!=null and workOrderCode!=''">
+                           AND wom.work_order_code LIKE CONCAT ("%",#{workOrderCode},"%")
+                    </if>
+                     <if test="workOrderType!=null">
+                           AND wom.work_order_type =#{workOrderType}
+                     </if>
+                     <if test="questionClassify!=null and questionClassify!=''">
+                           AND wom.question_classify LIKE CONCAT ("%",#{questionClassify},"%")
+                     </if>
+                     <if test="workOrderStatus!=null">
+                           AND wom.work_order_status =#{workOrderStatus}
+                     </if>
+                     <if test="createdBy!=null and createdBy!=''">
+                       AND wom.created_by =#{createdBy}
+                     </if>
+                     <if test="handlerBy!=null and handlerBy!=''">
+                       AND wom.handler_by =#{handlerBy}
+                     </if>
+                     <if test="createdStartTime!=null">
+                       and <![CDATA[ date_format(wom.created_time,'%Y-%m-%d %H:%i:%s') >=#{createdStartTime} ]]>
+                     </if>
+                     <if test="createdEndTime!=null">
+                       and <![CDATA[ date_format(wom.created_time,'%Y-%m-%d %H:%i:%s') <=#{createdEndTime} ]]>
+                     </if>
+               </where>
+                      order by wom.work_order_status asc,
+                      wom.created_time desc
+             </select>
+
+
+     <update id="pendingToProcessing">
+          update work_order_manage wom
+                set wom.handler_opinion=#{handlerOpinion} ,
+                    wom.updated_time = DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s'),
+                    wom.updated_by = #{userId},
+                    wom.work_order_status=2
+                where wom.work_order_status= 1  and wom.work_order_id =#{workOrderId}
+     </update>
+
+    <update id="processingToSolved">
+          update work_order_manage wom
+                set wom.handler_opinion=#{handlerOpinion},
+                    wom.updated_time = DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s'),
+                    wom.updated_by = #{userId},
+                    wom.work_order_status=3
+                where wom.work_order_status= 2  and wom.work_order_id =#{workOrderId}
+     </update>
+</mapper>

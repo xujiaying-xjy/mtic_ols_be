@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.agreement.AgreementMeasuredValuesMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.agreement.AgreementMeasuredValues">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="agreement_id" jdbcType="BIGINT" property="agreementId" />
+    <result column="serial_number" jdbcType="INTEGER" property="serialNumber" />
+    <result column="measured_name" jdbcType="VARCHAR" property="measuredName" />
+    <result column="measured_code" jdbcType="VARCHAR" property="measuredCode" />
+  </resultMap>
+</mapper>

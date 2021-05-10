@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.agreement.AgreementWarehouseMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.agreement.AgreementWarehouse">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="agreement_id" jdbcType="BIGINT" property="agreementId" />
+    <result column="agreement_name" jdbcType="VARCHAR" property="agreementName" />
+    <result column="agreement_code" jdbcType="VARCHAR" property="agreementCode" />
+    <result column="brand" jdbcType="VARCHAR" property="brand" />
+    <result column="model_number" jdbcType="VARCHAR" property="modelNumber" />
+    <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag" />
+    <result column="agreement_describe" jdbcType="VARCHAR" property="agreementDescribe" />
+    <result column="created_by" jdbcType="BIGINT" property="createdBy" />
+    <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+    <result column="updated_by" jdbcType="BIGINT" property="updatedBy" />
+    <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime" />
+    <result column="script_content" jdbcType="LONGVARCHAR" property="scriptContent" />
+    <result column="remark" jdbcType="LONGVARCHAR" property="remark" />
+  </resultMap>
+  <!--删除-->
+
+    <delete id="delAgreementWarehouse"  parameterType="com.mantoo.mtic.module.system.entity.agreement.AgreementWarehouse">
+      update agreement_warehouse aw
+            set aw.delete_flag =1
+         where aw.agreement_id=#{agreementId}
+    </delete>
+
+
+    <!--判断是否重复-->
+    <select id="selectAgreementByAgreement" resultType="java.lang.Integer">
+      select * from
+      agreement_warehouse aw
+      where
+      aw.agreement_code = #{agreementCode}
+    </select>
+
+
+  <!--条件模糊查询协议信息-->
+  <select id="selectByAgreementListWithCondition" resultType="com.mantoo.mtic.module.system.entity.agreement.AgreementWarehouse" resultMap="BaseResultMap">
+    SELECT
+     aw.*
+    FROM
+    agreement_warehouse aw
+    WHERE
+    aw.delete_flag = 0
+    <if test="agreementName != null and agreementName !=''">
+      AND aw.`agreement_name` LIKE CONCAT ("%",#{agreementName},"%")
+    </if>
+    <if test="agreementCode != null and agreementCode !=''">
+      AND aw.`agreement_code` LIKE CONCAT ("%",#{agreementCode},"%")
+    </if>
+
+</select>
+
+
+<!--条件模糊查询协议测量信息-->
+  <select id="selectAgreementListWithCondition"
+          resultType="com.mantoo.mtic.module.system.entity.agreement.AgreementMeasuredValues">
+    select
+     v.serial_number,v.measured_name,v.measured_code
+    from
+    agreement_warehouse aw
+	left join
+	agreement_measured_values v on aw.agreement_id=v.agreement_id
+	where
+	aw.agreement_id=#{agreementId}
+  </select>
+</mapper>

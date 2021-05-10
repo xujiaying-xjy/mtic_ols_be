@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.system.ProductManageMapper">
+  <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.system.ProductManage">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="product_id" jdbcType="BIGINT" property="productId" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_code" jdbcType="VARCHAR" property="productCode" />
+    <result column="product_type" jdbcType="INTEGER" property="productType" />
+    <result column="produce_status" jdbcType="INTEGER" property="produceStatus" />
+    <result column="product_describe" jdbcType="VARCHAR" property="productDescribe" />
+    <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag" />
+    <result column="create_by" jdbcType="BIGINT" property="createBy" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_by" jdbcType="BIGINT" property="updateBy" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+    <sql id="Base_Column_List" >
+    	product_id,product_name,product_code,product_type,produce_status,product_describe,delete_flag,create_by,create_time,update_by,update_time
+  	</sql>
+
+  <!--条件模糊查询-->
+  <select id="selectProductManageListWithCondition" parameterType="com.mantoo.mtic.module.system.entity.system.ProductManage" resultMap="BaseResultMap">
+    select
+        <include refid="Base_Column_List" /> from product_manage pm
+    <where>
+        <if test="productName != null and productName !=''">
+            AND pm.product_name LIKE CONCAT ("%",#{productName},"%")
+        </if>
+        <if test="productCode != null and productCode !='' ">
+            AND pm.product_code  LIKE CONCAT ("%",#{productCode},"%")
+        </if>
+        <if test="productType != null">
+            AND pm.product_type = #{productType}
+        </if>
+        <if test="produceStatus != null">
+            AND pm.produce_status = #{produceStatus}
+        </if>
+        and pm.delete_flag = 0
+  </where>
+
+  </select>
+
+    <!--通过产品型号查询产品-->
+  <select id="selectProductManageByProductCode" parameterType="com.mantoo.mtic.module.system.entity.system.ProductManage" resultMap="BaseResultMap">
+      select * from product_manage pm where pm.product_code =#{productCode}
+  </select>
+
+    <!--更新产品-->
+  <update id="updateProductManageInfo" parameterType="com.mantoo.mtic.module.system.entity.system.ProductManage">
+      update product_manage pm
+           <set>
+              <if test="productName != null and productName !=''">
+                 pm.product_name =#{productName},
+              </if>
+              <if test="productType != null">
+                 pm.product_type = #{productType},
+              </if>
+              <if test="produceStatus != null">
+                 pm.produce_status =#{produceStatus},
+              </if>
+               <if test="updateTime != null">
+                   pm.update_time =#{updateTime},
+               </if>
+               <if test="updateBy != null and updateBy!=''">
+                   pm.update_by =#{updateBy},
+               </if>
+               <if test="productDescribe!=null and productDescribe!=''">
+                   pm.product_describe =#{productDescribe},
+               </if>
+           </set>
+           where pm.product_id =#{productId}
+  </update>
+
+    <!--删除产品，不是真正删除，而是将标志改为1-->
+    <update id="deleteProductManage" parameterType="com.mantoo.mtic.module.system.entity.system.ProductManage">
+        update product_manage pm
+            set pm.delete_flag =1
+         where pm.product_id=#{productId}
+    </update>
+
+    <!--查询所有产品型号-->
+    <select id="getProductCodeList" resultType="com.mantoo.mtic.module.system.entity.system.ProductManage">
+        select * from product_manage  GROUP BY product_code order by product_id asc
+    </select>
+</mapper>

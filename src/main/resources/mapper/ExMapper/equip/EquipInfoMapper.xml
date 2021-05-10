@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.equip.EquipInfoMapper">
+    <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.equip.EquipInfo">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="equip_id" jdbcType="BIGINT" property="equipId"/>
+        <result column="equip_sn" jdbcType="VARCHAR" property="equipSn"/>
+        <result column="equip_type" jdbcType="VARCHAR" property="equipType"/>
+        <result column="batch_number" jdbcType="VARCHAR" property="batchNumber"/>
+        <result column="equip_date" jdbcType="VARCHAR" property="equipDate"/>
+        <result column="serial_number" jdbcType="VARCHAR" property="serialNumber"/>
+        <result column="is_online" jdbcType="VARCHAR" property="isOnline"/>
+        <result column="last_ontime" jdbcType="TIMESTAMP" property="lastOntime"/>
+        <result column="equip_mac" jdbcType="VARCHAR" property="equipMac"/>
+        <result column="equip_status" jdbcType="INTEGER" property="equipStatus"/>
+        <result column="in_time" jdbcType="VARCHAR" property="inTime"/>
+        <result column="out_time" jdbcType="VARCHAR" property="outTime"/>
+        <result column="in_remark" jdbcType="VARCHAR" property="inRemark"/>
+        <result column="out_remark" jdbcType="VARCHAR" property="outRemark"/>
+        <result column="equip_group_id" jdbcType="BIGINT" property="equipGroupId"/>
+        <result column="firmware_id" jdbcType="BIGINT" property="firmwareId"/>
+        <result column="equip_sale_status" jdbcType="INTEGER" property="equipSaleStatus"/>
+        <result column="product_id" jdbcType="BIGINT" property="productId"/>
+        <result column="equip_in_date" jdbcType="TIMESTAMP" property="equipInDate"/>
+        <result column="equip_out_date" jdbcType="TIMESTAMP" property="equipOutDate"/>
+    </resultMap>
+
+    <select id="getPageList" resultType="com.mantoo.mtic.module.system.entity.vo.EquipInfoVo">
+        select ei.*,eg.equip_group_name,eg.equip_group_code,pm.product_name,pm.product_type,fm.firmware_name from equip_info ei
+        left join equip_group eg on ei.equip_group_id=eg.equip_group_id
+        left join product_manage pm on ei.product_id=pm.product_id
+        left join firmware_manage fm on ei.firmware_id=fm.firmware_id
+        <where>
+            ei.equip_sale_status=#{equipSaleStatus}
+            <if test="equipSn!=null and equipSn!=''">
+                and ei.equip_sn LIKE CONCAT ("%",#{equipSn},"%")
+            </if>
+            <if test="equipMac!=null and equipMac!=''">
+                and ei.equip_mac LIKE CONCAT ("%",#{equipMac},"%")
+            </if>
+            <if test="equipStatus != null">
+                AND pm.equip_status = #{equipStatus}
+            </if>
+            <if test="productId != null">
+                AND pm.product_id = #{productId}
+            </if>
+            <if test="firmwareId != null">
+                AND fm.firmware_id = #{firmwareId}
+            </if>
+            <if test="isOnline != null">
+                AND ei.is_online = #{isOnline}
+            </if>
+            <if test="equipStatus != null">
+                AND ei.equip_status = #{equipStatus}
+            </if>
+            <if test="equipGroupId != null">
+                AND eg.equip_group_id = #{equipGroupId}
+            </if>
+            <if test="inStartDate!=null and inStartDate!=''">
+                and <![CDATA[ date_format(ei.equip_in_date,'%Y-%m-%d %H:%i:%s') >=#{inStartDate} ]]>
+            </if>
+            <if test="inEndDate!=null and inEndDate!=''">
+                and <![CDATA[ date_format(ei.equip_in_date,'%Y-%m-%d %H:%i:%s') <=#{inEndDate} ]]>
+            </if>
+
+            <if test="outStartDate!=null and outStartDate!=''">
+                and <![CDATA[ date_format(ei.equip_out_date,'%Y-%m-%d %H:%i:%s') >=#{outStartDate} ]]>
+            </if>
+            <if test="outEndDate!=null and outEndDate!=''">
+                and <![CDATA[ date_format(ei.equip_out_date,'%Y-%m-%d %H:%i:%s') <=#{outEndDate} ]]>
+            </if>
+        </where>
+        order by ei.equip_date desc
+    </select>
+
+    <select id="selectRecord" resultType="com.mantoo.mtic.module.system.entity.equip.EquipInfoDetails">
+        select d.*,u.name from equip_info_details d
+        left join sys_user u on d.operation_id=u.user_id
+        where d.equip_id=#{equipId}
+        order by d.operation_time asc
+    </select>
+
+    <update id="updateFirmware">
+        update equip_info set
+        firmware_id=#{firmwareId}
+        where equip_id in
+        <foreach collection="equipIdList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateEquipStatus">
+        update equip_info set
+        equip_status=#{equipStatus}
+        where equip_id in
+        <foreach collection="equipIdList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <insert id="insertRecord">
+        insert into equip_info_details (equip_id,operation_id,operation_status,operation_time,remark)
+        values
+        <foreach collection="equipIdList" item="item" index="index" separator=",">
+            (#{item},#{operationId},#{operationStatus},now(),#{remark})
+        </foreach>
+    </insert>
+
+    <select id="selectMaterial" resultType="com.mantoo.mtic.module.system.entity.system.MaterialManage">
+        select mm.* from equip_info ei
+        left join material_manage mm on ei.product_id=mm.product_id
+        where ei.equip_id=#{equipId} and mm.delete_flag=0
+    </select>
+    
+    <update id="insertFirmwareChannelId">
+        update equip_info set
+        firmware_channel_id=#{firmwareChannelId}
+        where equip_id=#{equipId}
+    </update>
+</mapper>

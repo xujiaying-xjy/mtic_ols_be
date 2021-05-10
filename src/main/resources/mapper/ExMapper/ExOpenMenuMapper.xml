@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mantoo.mtic.module.system.exMapper.ExOpenMenuMapper">
+    <resultMap id="BaseResultMap" type="com.mantoo.mtic.module.system.entity.OpenMenu">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="menu_id" jdbcType="VARCHAR" property="menuId" />
+        <result column="parent_id" jdbcType="VARCHAR" property="parentId" />
+        <result column="parent_ids" jdbcType="VARCHAR" property="parentIds" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="sort" jdbcType="INTEGER" property="sort" />
+        <result column="href" jdbcType="VARCHAR" property="href" />
+        <result column="target" jdbcType="VARCHAR" property="target" />
+        <result column="icon" jdbcType="VARCHAR" property="icon" />
+        <result column="is_show" jdbcType="INTEGER" property="isShow" />
+    </resultMap>
+
+    <resultMap id="MenuResultMap" type="com.mantoo.mtic.module.system.data.ExOpenMenu" extends="BaseResultMap">
+        <!--页签-->
+        <collection property="tabMenuList" ofType="com.mantoo.mtic.module.system.data.TabMenu">
+            <id column="tab_menu_id" jdbcType="VARCHAR" property="menuId" />
+            <result column="tab_parent_id" jdbcType="VARCHAR" property="parentId" />
+            <result column="tab_parent_ids" jdbcType="VARCHAR" property="parentIds" />
+            <result column="tab_name" jdbcType="VARCHAR" property="name" />
+            <result column="tab_type" jdbcType="INTEGER" property="type" />
+            <result column="tab_sort" jdbcType="INTEGER" property="sort" />
+            <result column="tab_href" jdbcType="VARCHAR" property="href" />
+            <result column="tab_target" jdbcType="VARCHAR" property="target" />
+            <result column="icon" jdbcType="VARCHAR" property="icon" />
+            <result column="tab_is_show" jdbcType="INTEGER" property="isShow" />
+            <!--权限-->
+            <collection property="permissionList" ofType="com.mantoo.mtic.module.system.entity.Permission">
+                <id column="permission_id" jdbcType="BIGINT" property="permissionId" />
+                <result column="per_menu_id" jdbcType="VARCHAR" property="menuId" />
+                <result column="permission_name" jdbcType="VARCHAR" property="permissionName" />
+                <result column="per_sort" jdbcType="INTEGER" property="sort" />
+                <result column="shiro_code" jdbcType="VARCHAR" property="shiroCode" />
+            </collection>
+        </collection>
+    </resultMap>
+
+    <!-- 根据角色获取菜单权限列表 -->
+    <select id="getMenuListByRole" resultMap="MenuResultMap" parameterType="long">
+        SELECT
+            p.permission_id,
+            p.permission_name,
+            p.sort AS per_sort,
+            p.shiro_code,
+            p.menu_id AS per_menu_id,
+            om.menu_id AS tab_menu_id,
+            om.parent_id AS tab_parent_id,
+            om.parent_ids AS tab_parent_ids,
+            om.`name` AS tab_name,
+            om.type AS tab_type,
+            om.sort AS tab_sort,
+            om.href AS tab_href,
+            om.target AS tab_target,
+            om.is_show AS tab_is_show,
+            m.*
+        FROM
+            permission p
+        LEFT JOIN open_menu om ON p.menu_id = om.menu_id
+        LEFT JOIN open_menu m ON om.parent_id = m.menu_id
+        LEFT JOIN sys_role_permission rp ON rp.permission_id = p.permission_id
+        <if test="roleId != null">
+            WHERE
+            rp.role_id = #{roleId}
+        </if>
+    </select>
+
+    <!--根据角色获取菜单列表（没有权限列表），登录时调用-->
+    <select id="getMenuListByLogin" resultMap="MenuResultMap" parameterType="long">
+        SELECT
+            om.menu_id AS tab_menu_id,
+            om.parent_id AS tab_parent_id,
+            om.parent_ids AS tab_parent_ids,
+            om.`name` AS tab_name,
+            om.type AS tab_type,
+            om.sort AS tab_sort,
+            om.href AS tab_href,
+            om.target AS tab_target,
+            om.is_show AS tab_is_show,
+            m.*
+        FROM
+            permission p
+        LEFT JOIN open_menu om ON p.menu_id = om.menu_id
+        LEFT JOIN open_menu m ON om.parent_id = m.menu_id
+        LEFT JOIN sys_role_permission rp ON rp.permission_id = p.permission_id
+        <if test="roleId != null">
+            WHERE
+            rp.role_id = #{roleId}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,25 @@
+spring:
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+mybatis:
+  configuration:
+    call-setters-on-nulls: true
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml,classpath:mapper/**/*.xml
+  type-aliases-package: com.mantoo.mtic.module.system.entity
+pagehelper:
+  helperDialect: mysql
+  params: count=countSql
+  reasonable: true
+  supportMethodsArguments: true
+mapper:
+  identity: MYSQL
+  mappers: com.mantoo.mtic.common.mapper.MyMapper
+  not-empty: false
